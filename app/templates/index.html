@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Machines</h1>
+    <table class="table table-striped table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Host</th>
+                <th scope="col">Username</th>
+                <th scope="col">Status</th>
+                <th scope="col">Action</th>
+                <th scope="col">JQuery action</th>
+          </tr>
+        </thead>
+        {% for host in hosts %}
+          <tr>
+            <td>{{ host.name }}</td>
+            <td>{{ host.host }}</td>
+            <td>{{ host.user }}</td>
+            <td>{{ host.status }}</td>
+            <td><button type="button" class="btn btn-success" onclick="wake('{{ host.host }}', '{{ host.user }}')">Wake</button></td>
+            <td><button type="button" class="btn btn-warning" onclick="hibernate('{{ host.host }}')">Hibernate</button></td>
+          </tr>
+        {% endfor %}
+    </table>
+
+    <div>Button clicked result: </div>
+    <div id="clicked_result">Cluicked result</div>
+
+    <!-- 
+    -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script>
+        
+        function myFunction(host, user) {
+          document.getElementById("clicked_result").innerHTML = "host: " + host + " user: " + user;
+          console.log("host: " + host + " user: " + user);
+        }
+
+        function jq_request(host, user) {
+          //$.post("/update_host", JSON.stringify({param: host}), function (data, status){
+          //  alert("Data: " + data + "\nStatus: " + status);
+          //}
+          //)
+          
+          var dict = {param: host}
+          $.ajax({
+            type: "POST", 
+            url: "/update_host", //localhost Flask
+            data : JSON.stringify(dict),
+            contentType: "application/json",
+            // success: function(data, status){
+            //     console.log("Data: " + data + "\nStatus: " + status);
+            // }
+          }
+          );
+          location.reload();
+        }
+
+        function hibernate(host) {          
+          var dict = {param: host}
+          $.ajax({
+            type: "POST", 
+            url: "/hibernate/" + host,
+            contentType: "application/json",
+            success: function(data, status){
+                 console.log("Data: " + data + "\nStatus: " + status);
+            }
+          }
+          );
+        }
+
+        function wake(host) {          
+          var dict = {param: host}
+          $.ajax({
+            type: "POST", 
+            url: "/wake/" + host, 
+            contentType: "application/json",
+            success: function(data, status){
+                 console.log("Data: " + data + "\nStatus: " + status);
+            }
+          }
+          );
+        }
+    </script>
+{% endblock %}
